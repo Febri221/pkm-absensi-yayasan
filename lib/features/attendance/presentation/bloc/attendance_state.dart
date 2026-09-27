@@ -21,10 +21,23 @@ class AttendanceLoaded extends AttendanceState {
   List<Object> get props => [data];
 }
 
+class AttendanceSubmitting extends AttendanceState {}
+
+class AttendanceSubmitSuccess extends AttendanceState {
+  final String message;
+
+  const AttendanceSubmitSuccess(this.message);
+
+   @override
+  List<Object> get props => [message];
+}
+
 class AttendanceError extends AttendanceState {
   final String message;
+  
   const AttendanceError(this.message);
 
   @override
   List<Object> get props => [message];
 }
+

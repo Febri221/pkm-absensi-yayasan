@@ -7,4 +7,11 @@ abstract class AttendanceRepository {
         required double targetLongitude,
         required double radius,
     });
+
+    Future<void> submitAttendance({
+      required double latitude,
+      required double longitude,
+      required String statusKehadiran,
+      required String tipeAbsen,
+    });
 }
