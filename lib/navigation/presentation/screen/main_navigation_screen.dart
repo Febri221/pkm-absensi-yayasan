@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sistem_absensi_sekolah/core/constants/main_nav_color.dart';
+import 'package:sistem_absensi_sekolah/features/history/presentation/screen/history_screen.dart';
 import '../../cubit/main_navigation_cubit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/attendance/presentation/screen/attendance_screen.dart';
@@ -17,18 +17,15 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainNavigationScreen> {
-
-
   @override
   Widget build(BuildContext context) {
-
     // Pastikan urutan array ini sama dengan index 0, 1, 2, 3
     final List<Widget> _pages = [
-     const AttendanceScreen(), // Tab 0: Home / Absen GPS lu
-     Center(child: Text('Halaman Riwayat')),
-     Center(child: Text('Halaman Profile')),
-  // const HistoryScreen(),    // Tab 1: Riwayat Absen
-  // const ProfileScreen(),    // Tab 2: Profil User
+      const AttendanceScreen(), // Tab 0: Home / Absen GPS lu
+      const HistoryScreen(),
+      Center(child: Text('Halaman Profile')),
+      // const HistoryScreen(),    // Tab 1: Riwayat Absen
+      // const ProfileScreen(),    // Tab 2: Profil User
     ];
 
     return BlocProvider(
@@ -38,9 +35,7 @@ class _MainPageState extends State<MainNavigationScreen> {
           return Scaffold(
             extendBody:
                 true, // WAJIB: Biar background konten nembus ke bawah kaca
-            body: IndexedStack(
-              index: currentCubitIndex,
-              children: _pages),
+            body: IndexedStack(index: currentCubitIndex, children: _pages),
             bottomNavigationBar: _buildGlassBottomNav(
               context,
               currentCubitIndex,
@@ -69,7 +64,7 @@ class _MainPageState extends State<MainNavigationScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color:  Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -89,8 +84,9 @@ class _MainPageState extends State<MainNavigationScreen> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   // Langsung panggil Cubit dengan index murni (0, 1, 2, 3)
-                  onTap: () => context.read<MainNavigationCubit>().switchTab(index),
-                        
+                  onTap: () =>
+                      context.read<MainNavigationCubit>().switchTab(index),
+
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Stack(
@@ -106,13 +102,16 @@ class _MainPageState extends State<MainNavigationScreen> {
                               height: 3,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [MainNavColor.blue, MainNavColor.blueMid],
+                                  colors: [
+                                    MainNavColor.blue,
+                                    MainNavColor.blueMid,
+                                  ],
                                 ),
                                 borderRadius: BorderRadius.circular(1.5),
                               ),
                             ),
                           ),
-                    
+
                         // --- IKON & TEKS ---
                         Column(
                           mainAxisSize: MainAxisSize.min,
