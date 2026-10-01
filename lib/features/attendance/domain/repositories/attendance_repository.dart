@@ -8,6 +8,8 @@ abstract class AttendanceRepository {
         required double radius,
     });
 
+    Future<Map<String, dynamic>> getAttendanceStatus();
+
     Future<void> submitAttendance({
       required double latitude,
       required double longitude,

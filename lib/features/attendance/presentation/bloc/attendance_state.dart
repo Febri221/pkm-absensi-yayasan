@@ -12,13 +12,22 @@ class AttendanceInitial extends AttendanceState {}
 
 class AttendanceLoading extends AttendanceState {}
 
-// Kalau sukses dapet lokasi, kita bawa data Entity-nya ke UI
+
 class AttendanceLoaded extends AttendanceState {
-  final AttendanceEntity data;
-  const AttendanceLoaded(this.data);
+  final AttendanceEntity geoData;        
+  final bool sudahMasuk;                 
+  final bool sudahPulang;                
+  final String jamPulang;                
+
+  const AttendanceLoaded({
+    required this.geoData,
+    required this.sudahMasuk,
+    required this.sudahPulang,
+    required this.jamPulang,
+  });
 
   @override
-  List<Object> get props => [data];
+  List<Object> get props => [geoData, sudahMasuk, sudahPulang, jamPulang];
 }
 
 class AttendanceSubmitting extends AttendanceState {}

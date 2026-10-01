@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sistem_absensi_sekolah/core/constants/main_nav_color.dart';
 import 'package:sistem_absensi_sekolah/features/history/presentation/screen/history_screen.dart';
+import 'package:sistem_absensi_sekolah/features/profile/screen/profile_screen.dart';
 import '../../cubit/main_navigation_cubit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/attendance/presentation/screen/attendance_screen.dart';
@@ -23,7 +24,7 @@ class _MainPageState extends State<MainNavigationScreen> {
     final List<Widget> _pages = [
       const AttendanceScreen(), // Tab 0: Home / Absen GPS lu
       const HistoryScreen(),
-      Center(child: Text('Halaman Profile')),
+      const ProfileScreen(),
       // const HistoryScreen(),    // Tab 1: Riwayat Absen
       // const ProfileScreen(),    // Tab 2: Profil User
     ];

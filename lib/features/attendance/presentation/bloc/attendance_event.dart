@@ -7,7 +7,7 @@ sealed class AttendanceEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class CheckLocationButtonPressed extends AttendanceEvent {}
+class LoadAttendanceStatusEvent extends AttendanceEvent {}
 
 class SubmitAttendanceButtonPressed extends AttendanceEvent {
   final double latitude;
