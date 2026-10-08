@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sistem_absensi_sekolah/features/attendance/domain/usecase/get_school_settings_usecase.dart';
 import '../../domain/usecase/check_geofence_usecase.dart';
 import '../../domain/usecase/submit_attendance_usecase.dart';
 import '../../domain/usecase/get_attendance_status_usecase.dart'; // Import UseCase baru
@@ -7,13 +8,15 @@ import 'attendance_state.dart';
 
 class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final CheckGeofenceUseCase checkGeofenceUseCase;
-  final SubmitAttendanceUsecase submitAttendanceUsecase;
+  final SubmitAttendanceUseCase submitAttendanceUsecase;
   final GetAttendanceStatusUseCase getAttendanceStatusUseCase; // Cukup UseCase saja!
+  final GetSchoolSettingsUseCase getSchoolSettingsUseCase;
 
   AttendanceBloc({
     required this.checkGeofenceUseCase,
     required this.submitAttendanceUsecase,
-    required this.getAttendanceStatusUseCase, // Masukin ke constructor
+    required this.getAttendanceStatusUseCase, 
+    required this.getSchoolSettingsUseCase, 
   }) : super(AttendanceInitial()) {
     
  
@@ -23,14 +26,13 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       emit(AttendanceSubmitting());
       try {
         await submitAttendanceUsecase(
-          latitude: event.latitude,
-          longitude: event.longitude,
-          statusKehadiran: 'tepat_waktu',
+          
           tipeAbsen: event.tipeAbsen,
         );
         emit(const AttendanceSubmitSuccess('Absen Berhasil Dicatat! 🎉'));
       } catch (e) {
-        emit(AttendanceError(e.toString()));
+        final cleanMessage = e.toString().replaceAll('Exception: ','').trim();
+        emit(AttendanceError(cleanMessage));
       }
     });
 
@@ -38,25 +40,39 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<LoadAttendanceStatusEvent>((event, emit) async {
       emit(AttendanceLoading());
       try {
-        // 1. Panggil UseCase buat dapetin status database (sudah masuk/pulang, jam pulang)
+        print("DEBUG: Sedang memuat status...");
         final statusMap = await getAttendanceStatusUseCase();
+        print("DEBUG: Status map aman: $statusMap");
         
+        print("DEBUG: Sedang memuat settings sekolah...");
+        final settingsMap = await getSchoolSettingsUseCase();
+        print("DEBUG: Settings map aman: $settingsMap");
 
+        final double schoolLat = settingsMap['lat'];
+        final double schoolLong = settingsMap['lng'];
+        final double radius = settingsMap['radius'];
+
+        print("DEBUG: Sedang cek geofence GPS...");
         final geoResult = await checkGeofenceUseCase(
-          targetLatitude: -6.358511,
-          targetLongitude: 106.562474,
-          radius: 70.0,
+          targetLatitude: schoolLat,
+          targetLongitude: schoolLong,
+          radius: radius,
         );
 
-        // 3. Kirim semua datanya secara rapi ke UI lewat AttendanceLoaded yang udah di-upgrade
         emit(AttendanceLoaded(
           geoData: geoResult,
           sudahMasuk: statusMap['sudahMasuk'],
           sudahPulang: statusMap['sudahPulang'],
           jamPulang: statusMap['jamPulang'],
         ));
-      } catch (e) {
-        emit(AttendanceError(e.toString()));
+      } catch (e, stackTrace) {
+        // INI PENTING: Print error asli beserta jejak filenya (stackTrace)
+        print("--- ERROR TERTANGKAP DI BLOC ---");
+        print("Pesan Error: $e");
+        print("Jejak Error (StackTrace): $stackTrace");
+        
+        final cleanMessage = e.toString().replaceAll('Exception: ','').trim();
+        emit(AttendanceError(cleanMessage));
       }
     });
   }

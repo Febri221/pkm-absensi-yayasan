@@ -13,13 +13,15 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     required double targetLongitude,
     required double radius,
   }) async {
+
+    
     // 1. CEK APAKAH GPS/LOCATION SERVICE NYALA ATAU MATI DULU!
     // Ini harus dicek paling awal sebelum ngurusin permission.
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       // Di sini kita lempar pesan yang jelas ke BLoC/UI
       // supaya UI bisa nangkep dan nampilin pop-up atau dialog peringatan nyalain GPS.
-      throw Exception('GPS_DISABLED');
+      throw 'GPS_DISABLED';
     }
 
     // 2. BARU CEK PERMISSION (IZIN APLIKASI)
@@ -87,15 +89,15 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
         .select('tingkat')
         .eq('id', user.id)
         .single();
-    
+
     final String tingkat = userData['tingkat'] ?? 'smp';
 
     // 3. AMBIL KONFIGURASI DARI DATABASE SUPABASE (TIDAK ADA HARDCODE!)
     final settings = await supabase.from('school_settings').select().single();
-    
+
     // Ambil jam pulang murni dari database berdasarkan tingkat siswa
-    final String jamPulangStr = (tingkat == 'smp') 
-        ? settings['jam_pulang_smp'] 
+    final String jamPulangStr = (tingkat == 'smp')
+        ? settings['jam_pulang_smp']
         : settings['jam_pulang_smk'];
 
     return {
@@ -108,12 +110,13 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
   @override
   Future<void> submitAttendance({
-    required double latitude,
-    required double longitude,
-    required String statusKehadiran,
+    
     required String tipeAbsen,
   }) async {
     try {
+       Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
       final user = supabase.auth.currentUser;
 
       if (user == null) {
@@ -130,7 +133,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
       final String roleUser = userData['role'];
 
-      String statusFinal = statusKehadiran;
+      String statusFinal = 'tepat_waktu';
 
       if (roleUser == 'siswa') {
         if (tipeAbsen == 'masuk') {
@@ -169,12 +172,23 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       await supabase.from('absensi').insert({
         'user_id': user.id,
         'tipe_absen': tipeAbsen,
-        'latitude': latitude,
-        'longitude': longitude,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
         'status_kehadiran': statusFinal,
       });
     } catch (e) {
       throw Exception('Gagal mengirim absen: $e');
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSchoolSettings() async {
+     final settings = await supabase.from('school_settings').select().single();
+
+    return {
+      'lat': (settings['school_lat'] as num?)?.toDouble() ?? -6.336527,
+      'lng': (settings['school_long'] as num?)?.toDouble() ?? 106.819846,
+      'radius': (settings['radius_meters'] as num?)?.toDouble() ?? 50.0,
+    };
   }
 }

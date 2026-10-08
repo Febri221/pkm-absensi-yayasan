@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:google_fonts/google_fonts.dart'; // Pastikan pakai Google Fonts
+import 'package:sistem_absensi_sekolah/features/auth/presentation/screen/change_password_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/presentation/screen/login_screen.dart';
 
@@ -23,7 +24,10 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50], // Background terang bersih ala instansi
       appBar: AppBar(
-        title: Text('Profil Pengguna', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Profil Pengguna',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
@@ -35,7 +39,9 @@ class ProfileScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text("Gagal memuat profil: ${snapshot.error}"));
+            return Center(
+              child: Text("Gagal memuat profil: ${snapshot.error}"),
+            );
           }
 
           final data = snapshot.data!;
@@ -50,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                
+
                 // CIRCLE AVATAR INISIAL OTOMATIS
                 CircleAvatar(
                   radius: 45,
@@ -65,21 +71,28 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // NAMA LENGKAP (Aman dari kepanjangan pake FittedBox/Ellipsis)
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     nama,
-                    style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
-                
+
                 // NOMOR INDUK
                 Text(
                   "Nomor Induk: $nomorInduk",
-                  style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14),
+                  style: GoogleFonts.inter(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -88,7 +101,10 @@ class ProfileScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(20),
@@ -96,24 +112,35 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       child: Text(
                         role.toUpperCase(),
-                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blue.shade700),
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade700,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         "$unit ${kelas != '-' && kelas != null ? '• Kelas $kelas' : ''}",
-                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black87),
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 40),
 
                 // TOMBOL LOGOUT
@@ -130,14 +157,35 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(LucideIcons.logOut, color: Colors.red),
-                    label: Text('Keluar Aplikasi (Logout)', style: GoogleFonts.inter(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w600)),
+                    label: Text(
+                      'Keluar Aplikasi (Logout)',
+                      style: GoogleFonts.inter(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                ListTile(
+                  leading: const Icon(LucideIcons.lock),
+                  title: const Text("Ubah Kata Sandi"),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChangePasswordScreen()),
+                    );
+                  },
+                ),
               ],
             ),
           );

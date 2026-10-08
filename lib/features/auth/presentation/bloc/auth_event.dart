@@ -18,3 +18,18 @@ class LoginButtonPressed extends AuthEvent {
 }
 
 class LogoutButtonPressed extends AuthEvent {}
+
+class ChangePasswordButtonPressed extends AuthEvent{
+  final String oldPassword;
+  final String newPassword;
+  final String confirmPassword;
+
+  const ChangePasswordButtonPressed({
+    required this.oldPassword,
+    required this.newPassword,
+    required this.confirmPassword,
+  });
+
+  @override
+  List<Object> get props => [oldPassword, newPassword, confirmPassword];
+}

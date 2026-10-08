@@ -25,18 +25,28 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> changePassword({
-    required String newPassword
+    required String oldPassword,
+    required String newPassword,
   }) async {
-
     try {
-        await supabase.auth.updateUser(
-            UserAttributes(password: newPassword)
-        );
+      final user = supabase.auth.currentUser;
+
+      if (user == null) throw Exception("Sesi login habis, silakan login ulang.");
+
+      final emailInternal = user.email;
+
+      if (emailInternal == null) throw Exception("Data email tidak valid.");
+
+      await supabase.auth.signInWithPassword(
+        email: emailInternal,
+        password: oldPassword,
+      );
+
+      await supabase.auth.updateUser(UserAttributes(password: newPassword));
     } catch (e) {
-        throw Exception('Gagal mengubah password: $e');
+      throw Exception('Gagal mengubah password. Pastikan kata sandi lama benar');
     }
   }
-
 
   @override
   Future<String?> getCurrentUserId() async {

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/admin_attendance_entity.dart';
+import '../../domain/entities/admin_class_attendance_entity.dart';
 
 sealed class AdminDashboardState extends Equatable {
   const AdminDashboardState();
@@ -13,12 +13,13 @@ class AdminDashboardInitial extends AdminDashboardState {}
 class AdminDashboardLoading extends AdminDashboardState {}
 
 class AdminDashboardLoaded extends AdminDashboardState {
-  final List<AdminAttendanceEntity> attendanceList;
+  final List<AdminClassAttendanceEntity> students;
+  final String selectedClass;
 
-  const AdminDashboardLoaded(this.attendanceList);
+  const AdminDashboardLoaded({required this.students, required this.selectedClass});
 
   @override
-  List<Object> get props => [attendanceList];
+  List<Object> get props => [students, selectedClass];
 }
 
 class AdminDashboardError extends AdminDashboardState {

@@ -1,33 +1,32 @@
-import '../../domain/entities/admin_attendance_entity.dart';
+import '../../domain/entities/admin_class_attendance_entity.dart';
 
-class AdminAttendanceModel extends AdminAttendanceEntity {
-  const AdminAttendanceModel({
-    required super.idAbsen,
+class AdminClassAttendanceModel extends AdminClassAttendanceEntity {
+  const AdminClassAttendanceModel({
+   required super.idSiswa,
     required super.namaLengkap,
     required super.nomorInduk,
-    required super.unitSekolah,
-    super.kelas,
-    required super.tipeAbsen,
-    required super.waktuAbsen,
+    required super.kelas,
     required super.statusKehadiran,
+    super.tipeAbsen,
+    super.waktuMasuk,
+    super.waktuPulang,
+    super.isSelected,
   });
 
-  factory AdminAttendanceModel.fromJson(Map<String, dynamic> json) {
-    // Ambil data relasi dari tabel users (Supabase nge-join pake nama key 'users')
-    final user = json['users'] ?? {};
-
-    return AdminAttendanceModel(
-      idAbsen: json['id_absen'] ?? '',
-      namaLengkap: user['nama_lengkap'] ?? 'Tanpa Nama',
-      nomorInduk: user['nomor_induk'] ?? '-',
-      unitSekolah: user['unit_sekolah'] ?? '-',
-      kelas: user['kelas'],
-      tipeAbsen: json['tipe_absen'] ?? '-',
-      // Pastikan format parsing tanggal ini aman
-      waktuAbsen: json['waktu_absen'] != null 
-          ? DateTime.parse(json['waktu_absen']) 
-          : DateTime.now(),
-      statusKehadiran: json['status_kehadiran'] ?? '-',
+factory AdminClassAttendanceModel.fromMap({
+    required Map<String, dynamic> userMap,
+    required String statusKehadiran,
+    DateTime? waktuMasuk,
+    DateTime? waktuPulang,
+  }) {
+    return AdminClassAttendanceModel(
+      idSiswa: userMap['id'] ?? '',
+      namaLengkap: userMap['nama_lengkap'] ?? 'Tanpa Nama',
+      nomorInduk: userMap['nomor_induk'] ?? '-',
+      kelas: userMap['kelas'] ?? '-',
+      statusKehadiran: statusKehadiran,
+      waktuMasuk: waktuMasuk,   // Masuk ke Entity
+      waktuPulang: waktuPulang, // Masuk ke Entity
     );
   }
 }

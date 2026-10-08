@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_attendance_repository_impl.dart';
-import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_admin_attendance_usecase.dart';
+import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
+import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_students_by_class_stream_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/cubit/admin_cubit.dart';
+import 'package:sistem_absensi_sekolah/features/admin/presentation/widgets/admin_main_layout_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'admin_dashboard_screen.dart'; // Nanti kita buat file ini
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -54,11 +54,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           MaterialPageRoute(
             builder: (_) => BlocProvider(
               create: (context) => AdminDashboardCubit(
-                getAdminAttendanceUseCase: GetAdminAttendanceUseCase(
-                  AdminAttendanceRepositoryImpl(),
+                getAttendanceByClassUseCase: GetAttendanceByClassUseCase(
+                  AdminClassRepositoryImpl(),
                 ),
-              )..fetchAttendanceData(),
-              child: const AdminDashboardScreen(),
+              ),
+              child: const AdminMainLayoutScreen(),
             ),
           ),
         );

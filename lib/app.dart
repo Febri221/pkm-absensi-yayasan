@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_attendance_repository_impl.dart';
-import 'package:sistem_absensi_sekolah/features/admin/domain/repositories/admin_attendance_repository.dart';
-import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_admin_attendance_usecase.dart';
-import 'package:sistem_absensi_sekolah/features/admin/presentation/cubit/admin_cubit.dart';
+import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
+import 'package:sistem_absensi_sekolah/features/admin/domain/repositories/admin_class_repository.dart';
+import 'package:sistem_absensi_sekolah/features/attendance/domain/usecase/get_school_settings_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/screen/admin_login_screen.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/data/repository/attendance_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/domain/repositories/attendance_repository.dart';
@@ -14,6 +13,7 @@ import 'package:sistem_absensi_sekolah/features/attendance/domain/usecase/submit
 import 'package:sistem_absensi_sekolah/features/attendance/presentation/bloc/attendance_bloc.dart';
 import 'package:sistem_absensi_sekolah/features/auth/data/repository/auth_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/auth/domain/repositories/auth_repository.dart';
+import 'package:sistem_absensi_sekolah/features/auth/domain/usecase/change_password_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/auth/domain/usecase/login_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sistem_absensi_sekolah/features/auth/presentation/screen/login_screen.dart';
@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<HistoryRepository>(
           create: (context) => HistoryRepositoriesImpl(),
         ),
-        RepositoryProvider<AdminAttendanceRepository>(
-          create: (context) => AdminAttendanceRepositoryImpl(),
+        RepositoryProvider<AdminClassRepository>(
+          create: (context) => AdminClassRepositoryImpl(),
         ),
       ],
       child: MultiBlocProvider(
@@ -52,7 +52,10 @@ class MyApp extends StatelessWidget {
               checkGeofenceUseCase: CheckGeofenceUseCase(
                 context.read<AttendanceRepository>(),
               ),
-              submitAttendanceUsecase: SubmitAttendanceUsecase(
+              submitAttendanceUsecase: SubmitAttendanceUseCase(
+                context.read<AttendanceRepository>(),
+              ),
+              getSchoolSettingsUseCase: GetSchoolSettingsUseCase(
                 context.read<AttendanceRepository>(),
               ),
             ),
@@ -60,6 +63,9 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => AuthBloc(
               loginUsecase: LoginUsecase(context.read<AuthRepository>()),
+              changePasswordUsecase: ChangePasswordUsecase(
+                context.read<AuthRepository>(),
+              ),
             ),
           ),
           BlocProvider(
@@ -69,6 +75,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
+
           // BlocProvider(
           //   create: (context) => AdminDashboardCubit(
           //     getAdminAttendanceUseCase: GetAdminAttendanceUseCase(
@@ -76,7 +83,6 @@ class MyApp extends StatelessWidget {
           //     ),
           //   ),
           // ),
-          
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
