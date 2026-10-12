@@ -20,3 +20,4 @@ class SubmitAttendanceButtonPressed extends AttendanceEvent {
   @override
   List<Object> get props => [ tipeAbsen]; 
 }
+class StartLiveLocationTracking extends AttendanceEvent {}

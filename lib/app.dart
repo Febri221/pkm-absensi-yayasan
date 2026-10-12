@@ -75,14 +75,6 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
-
-          // BlocProvider(
-          //   create: (context) => AdminDashboardCubit(
-          //     getAdminAttendanceUseCase: GetAdminAttendanceUseCase(
-          //       context.read<AdminAttendanceRepository>(),
-          //     ),
-          //   ),
-          // ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

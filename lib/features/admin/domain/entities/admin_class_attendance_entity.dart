@@ -10,6 +10,7 @@ class AdminClassAttendanceEntity extends Equatable {
   final DateTime? waktuPulang;
   final String statusKehadiran;
   final bool isSelected;
+  final String? unitSekolah;
 
   const AdminClassAttendanceEntity({
     required this.idSiswa,
@@ -17,6 +18,7 @@ class AdminClassAttendanceEntity extends Equatable {
     required this.nomorInduk,
     required this.kelas,
     required this.statusKehadiran,
+    this.unitSekolah,
     this.tipeAbsen,
     this.waktuMasuk,
     this.waktuPulang,
@@ -30,6 +32,7 @@ class AdminClassAttendanceEntity extends Equatable {
       nomorInduk: nomorInduk,
       kelas: kelas,
       statusKehadiran: statusKehadiran,
+      unitSekolah: unitSekolah,
       tipeAbsen: tipeAbsen,
       waktuMasuk: waktuMasuk,
       waktuPulang: waktuPulang,
@@ -48,6 +51,7 @@ class AdminClassAttendanceEntity extends Equatable {
     waktuPulang,
     statusKehadiran,
     isSelected,
+    unitSekolah,
   ];
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
+import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_attendance_by_role_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_students_by_class_stream_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/cubit/admin_cubit.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/widgets/admin_main_layout_screen.dart';
@@ -54,6 +55,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           MaterialPageRoute(
             builder: (_) => BlocProvider(
               create: (context) => AdminDashboardCubit(
+                getAttendanceByRoleUsecase: GetAttendanceByRoleUsecase(
+                  AdminClassRepositoryImpl(),
+                ),
                 getAttendanceByClassUseCase: GetAttendanceByClassUseCase(
                   AdminClassRepositoryImpl(),
                 ),

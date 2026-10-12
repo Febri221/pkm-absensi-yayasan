@@ -5,13 +5,7 @@ class SubmitAttendanceUseCase {
 
   SubmitAttendanceUseCase(this.repository);
 
-  Future<void> call({
-    
-    required String tipeAbsen,
-  }) async {
-    return await repository.submitAttendance(
-      
-      tipeAbsen: tipeAbsen,
-    );
+  Future<void> call({required String tipeAbsen}) async {
+    return await repository.submitAttendance(tipeAbsen: tipeAbsen);
   }
 }
