@@ -5,7 +5,10 @@ class BulkInsertUsersUsecase {
 
   BulkInsertUsersUsecase(this.repository);
 
-  Future<void> call(String csvStringContent) async {
-    return await repository.bulkInsertUsersFromCsv(csvStringContent);
+  Future<void> call(String csvString) async {
+    if (csvString.isEmpty) {
+      throw Exception("Data CSV kosong!");
+    }
+    return await repository.bulkInsertUsersFromCsv(csvString);
   }
 }

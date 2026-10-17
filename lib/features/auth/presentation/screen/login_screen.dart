@@ -4,7 +4,6 @@ import 'package:sistem_absensi_sekolah/navigation/presentation/screen/main_navig
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../../attendance/presentation/screen/attendance_screen.dart'; // Sesuaikan path ke screen absen lu
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});

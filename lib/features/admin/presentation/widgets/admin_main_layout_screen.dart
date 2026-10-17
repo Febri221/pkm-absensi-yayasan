@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sistem_absensi_sekolah/features/admin/presentation/screen/admin_user_management_screen.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/widgets/admin_guru_attendance_screen.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/widgets/admin_karyawan_attendance_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -31,12 +32,7 @@ class _AdminMainLayoutScreenState extends State<AdminMainLayoutScreen> {
     const AdminGuruAttendanceScreen(),
     const AdminKaryawanAttendanceScreen(),
 
-    const Center(
-      child: Text(
-        "Halaman Manajemen Siswa & Upload Excel (Akan datang)",
-        style: TextStyle(fontSize: 18),
-      ),
-    ),
+    const AdminUserManagementScreen()
   ];
 
   @override
