@@ -14,4 +14,6 @@ abstract class AdminClassRepository {
   Future<void> bulkInsertUsersFromCsv(String csvStringContent);
 
   Future<List<AdminClassAttendanceEntity>> getAttendanceByRole(String role);
+
+   Future<Map<String, List<String>>> getAvailableClasses();
 }

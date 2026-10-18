@@ -155,27 +155,24 @@ class AdminClassRepositoryImpl implements AdminClassRepository {
    @override
   Future<void> bulkInsertUsersFromCsv(String csvStringContent) async {
     try {
-      // 1. Konversi string teks CSV mentah menggunakan csv.decode
       List<List<dynamic>> rowsAsListOfValues = csv.decode(csvStringContent);
 
       if (rowsAsListOfValues.isEmpty) {
         throw Exception('File CSV kosong atau format tidak valid.');
       }
 
-      // 2. Looping mulai dari baris kedua (index 1) karena index 0 adalah Header
-      // Format Header CSV yang benar: [nomor_induk, nama_lengkap, role, unit_sekolah, tingkat, kelas]
       for (int i = 1; i < rowsAsListOfValues.length; i++) {
         var row = rowsAsListOfValues[i];
         
-        // Pastikan minimal ada 4 kolom utama (nomor_induk, nama_lengkap, role, unit_sekolah)
-        if (row.length < 4) continue; 
+        // Skip jika baris benar-benar kosong melompong
+        if (row.isEmpty || row[0] == null || row[0].toString().trim().isEmpty) continue;
 
-        String nomorInduk = row[0].toString().trim();
-        String namaLengkap = row[1].toString().trim();
-        String role = row[2].toString().trim().toLowerCase(); // 'siswa', 'guru', atau 'karyawan'
-        String unitSekolah = row[3].toString().trim();        // 'SMP 136' atau 'Pusat'
+        // Ambil data dengan aman menggunakan pengecekan index
+        String nomorInduk = row.length > 0 && row[0] != null ? row[0].toString().trim() : '';
+        String namaLengkap = row.length > 1 && row[1] != null ? row[1].toString().trim() : 'Tanpa Nama';
+        String role = row.length > 2 && row[2] != null ? row[2].toString().trim().toLowerCase() : 'siswa';
+        String unitSekolah = row.length > 3 && row[3] != null ? row[3].toString().trim() : 'Pusat';
         
-        // Untuk tingkat dan kelas (index 4 dan 5), cek dulu apakah ada isinya (Aman buat guru/karyawan yang kosong)
         String? tingkat = (row.length > 4 && row[4] != null && row[4].toString().trim().isNotEmpty) 
             ? row[4].toString().trim().toLowerCase() 
             : null;
@@ -184,36 +181,52 @@ class AdminClassRepositoryImpl implements AdminClassRepository {
             ? row[5].toString().trim() 
             : null;
 
-        // 3. Buat format email internal otomatis
         final emailInternal = "$nomorInduk@absensi.sekolah.internal";
-        final passwordDefault = "sekolah123"; // Password default awal
+        String passwordDefault = "sekolah123";
 
         try {
-          // 4. Daftarkan ke Supabase Auth
+          String? userId;
+
+          // 1. Daftarkan dulu ke Supabase Auth untuk mendapatkan UUID (id)
           final authResponse = await supabase.auth.signUp(
             email: emailInternal,
             password: passwordDefault,
           );
+          userId = authResponse.user?.id;
 
-          final userId = authResponse.user?.id;
+          // 2. Jika karena suatu hal userId null (misal email sudah ada), 
+          // kita ambil ID-nya berdasarkan email atau nomor_induk
+          if (userId == null) {
+            // Opsional: cari user yang sudah ada
+            final existingUser = await supabase
+                .from('users')
+                .select('id')
+                .eq('nomor_induk', nomorInduk)
+                .maybeSingle();
+            if (existingUser != null) {
+              userId = existingUser['id'];
+            }
+          }
 
           if (userId != null) {
-            // 5. Masukkan profil lengkap ke tabel 'users'
-            // Guru & Karyawan otomatis kolom tingkat & kelas-nya terisi NULL dengan aman!
+            // 3. Masukkan dengan menyertakan 'id' yang valid!
             await supabase.from('users').upsert({
-              'id': userId,
+              'id': userId, // <-- INI YANG KETINGGALAN DAN BIKIN ERROR NULL!
               'nomor_induk': nomorInduk,
               'nama_lengkap': namaLengkap,
               'role': role,
               'unit_sekolah': unitSekolah,
-              'tingkat': (role == 'siswa') ? tingkat : null, // Guru/karyawan dipaksa null
-              'kelas': (role == 'siswa') ? kelas : null,       // Guru/karyawan dipaksa null
+              'tingkat': (role == 'siswa') ? tingkat : null,
+              'kelas': (role == 'siswa') ? kelas : null,
               'tahun_ajaran': '2025/2026',
               'is_active': true,
-            });
+            }, onConflict: 'id'); // Konflik di-handle berdasarkan id atau nomor_induk
           }
-        } catch (authError) {
-          print("Skipping or error for NISN/NIP $nomorInduk: $authError");
+
+          print("Berhasil insert/update user: $namaLengkap ($role)");
+
+        } catch (rowError) {
+          print("Gagal memproses baris $nomorInduk ($namaLengkap): $rowError");
         }
       }
     } catch (e) {
@@ -270,10 +283,45 @@ class AdminClassRepositoryImpl implements AdminClassRepository {
           statusKehadiran: status,
         ));
       }
-
+print('DEBUG GURU/KARYAWAN ($role):');
+      print('Jumlah Staff Ditemukan: ${staffRes.length}');
+      print('Jumlah Absensi Hari Ini: ${absensiRes.length}');
+      print('Total Final Report: ${finalReport.length}');
       return finalReport;
     } catch (e) {
       throw Exception('Gagal menarik data rekap $role: $e');
     }
+  }
+
+  @override
+  Future<Map<String, List<String>>> getAvailableClasses() async {
+    // 1. Tarik semua data siswa yang aktif dan punya kelas
+    final response = await supabase
+        .from('users')
+        .select('unit_sekolah, kelas')
+        .eq('role', 'siswa')
+        .eq('is_active', true);
+
+    // 2. Olah data jadi Map dinamis { 'SMP 136': ['IX A', 'IX B'], 'SMK 155': [...] }
+    Map<String, List<String>> result = {};
+
+    for (var row in response) {
+      String unit = row['unit_sekolah'] ?? 'Lainnya';
+      String kelas = row['kelas'] ?? '-';
+      if (kelas == '-') continue;
+
+      if (!result.containsKey(unit)) {
+        result[unit] = [];
+      }
+      
+      if (!result[unit]!.contains(kelas)) {
+        result[unit]!.add(kelas);
+      }
+    }
+
+    // Sort tiap list kelas biar rapi (A, B, C...)
+    result.forEach((key, value) => value.sort());
+    
+    return result;
   }
 }

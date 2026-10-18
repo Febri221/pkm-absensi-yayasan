@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/repositories/admin_class_repository.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/domain/usecase/get_school_settings_usecase.dart';
-import 'package:sistem_absensi_sekolah/features/admin/presentation/screen/admin_login_screen.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/data/repository/attendance_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/domain/repositories/attendance_repository.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/domain/usecase/check_geofence_usecase.dart';
@@ -16,11 +14,11 @@ import 'package:sistem_absensi_sekolah/features/auth/domain/repositories/auth_re
 import 'package:sistem_absensi_sekolah/features/auth/domain/usecase/change_password_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/auth/domain/usecase/login_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:sistem_absensi_sekolah/features/auth/presentation/screen/login_screen.dart';
 import 'package:sistem_absensi_sekolah/features/history/data/repositories/history_repositories_impl.dart';
 import 'package:sistem_absensi_sekolah/features/history/domain/repositories/history_repository.dart';
 import 'package:sistem_absensi_sekolah/features/history/domain/usecase/get_history_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/history/presentation/bloc/history_bloc.dart';
+import 'auth_wrapper.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -78,7 +76,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: kIsWeb ? const AdminLoginScreen() : LoginScreen(),
+          home:  const AuthWrapper()
         ),
       ),
     );

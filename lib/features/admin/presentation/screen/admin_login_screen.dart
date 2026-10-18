@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/bulk_insert_users_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_attendance_by_role_usecase.dart';
+import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_classes_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_students_by_class_stream_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/cubit/admin_cubit.dart';
-import 'package:sistem_absensi_sekolah/features/admin/presentation/widgets/admin_main_layout_screen.dart';
+import 'package:sistem_absensi_sekolah/features/admin/presentation/screen/admin_main_layout_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -49,29 +50,17 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       final String role = userData['role'] ?? '';
 
       if (role == 'admin') {
-        // Kalau bener admin, lempar ke Dashboard Web!
+        // Kalau bener admin, arahkan ke AdminMainLayoutScreen. 
+        // Biarkan AuthWrapper/Layout yang nanti nyediain Cubit-nya secara global!
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (context) => AdminDashboardCubit(
-                bulkInsertUsersUsecase: BulkInsertUsersUsecase(
-                  AdminClassRepositoryImpl(),
-                ),
-                getAttendanceByRoleUsecase: GetAttendanceByRoleUsecase(
-                  AdminClassRepositoryImpl(),
-                ),
-                getAttendanceByClassUseCase: GetAttendanceByClassUseCase(
-                  AdminClassRepositoryImpl(),
-                ),
-              ),
-              child: const AdminMainLayoutScreen(),
-            ),
+            builder: (_) => const AdminMainLayoutScreen(), // Bersih kan? Tanpa BlocProvider manual di sini
           ),
         );
       } else {
-        // Kalau bukan admin (misal siswa nyoba login disini), tolak!
+        // Kalau bukan admin, tolak!
         await supabase.auth.signOut();
         setState(() {
           _errorMessage = 'Akses ditolak! Akun ini bukan akun Admin.';

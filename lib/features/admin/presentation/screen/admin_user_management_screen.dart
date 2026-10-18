@@ -61,7 +61,7 @@ Future<void> _pickAndUploadFile(BuildContext context) async {
       ),
       body: BlocConsumer<AdminDashboardCubit, AdminDashboardState>(
         listener: (context, state) {
-          if (state is AdminDashboardError) {
+          if (state is AdminUploadSuccess) {
             if (state.message == 'UPLOAD_SUCCESS') {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Data berhasil di-upload dan didaftarkan! 🎉"), backgroundColor: Colors.green),

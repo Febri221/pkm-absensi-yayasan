@@ -22,6 +22,23 @@ class AdminDashboardLoaded extends AdminDashboardState {
   List<Object> get props => [students, selectedClass];
 }
 
+class AdminClassesLoaded extends AdminDashboardState {
+  final Map<String, List<String>> classesMap;
+
+  const AdminClassesLoaded(this.classesMap);
+
+  @override
+  List<Object> get props => [classesMap];
+}
+
+class AdminUploadSuccess extends AdminDashboardState {
+  final String message;
+  const AdminUploadSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
 class AdminDashboardError extends AdminDashboardState {
   final String message;
 

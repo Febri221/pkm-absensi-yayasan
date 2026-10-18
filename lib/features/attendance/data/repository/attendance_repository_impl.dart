@@ -2,7 +2,6 @@ import 'package:geolocator/geolocator.dart';
 import '../../domain/entities/attendance_entity.dart';
 import '../../domain/repositories/attendance_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AttendanceRepositoryImpl implements AttendanceRepository {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -13,8 +12,6 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     required double targetLongitude,
     required double radius,
   }) async {
-
-    
     // 1. CEK APAKAH GPS/LOCATION SERVICE NYALA ATAU MATI DULU!
     // Ini harus dicek paling awal sebelum ngurusin permission.
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -65,9 +62,22 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     final user = supabase.auth.currentUser;
     if (user == null) throw Exception('Sesi login habis.');
 
-    final today = DateTime.now().toIso8601String().split('T')[0];
+    // 1. Cek hari libur (Sabtu / Minggu)
+    final now = DateTime.now();
+    if (now.weekday == 6 || now.weekday == 7) {
+      return {
+        'isLibur': true,
+        'sudahMasuk': false,
+        'sudahPulang': false,
+        'tingkat': 'smp',
+        'jamPulang': '14:10:00',
+      };
+    }
 
-    // 1. Cek riwayat absen hari ini
+    // 2. Ambil tanggal hari ini (Format: YYYY-MM-DD)
+    final today = now.toIso8601String().split('T')[0];
+
+    // 3. KUERI PENGAMAN: Tarik data absensi user ini HANYA untuk hari ini
     final response = await supabase
         .from('absensi')
         .select()
@@ -78,12 +88,17 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     bool sudahMasuk = false;
     bool sudahPulang = false;
 
+    // 4. Periksa apakah di dalam list hari ini ada tipe 'masuk' atau 'pulang'
     for (var item in response) {
-      if (item['tipe_absen'] == 'masuk') sudahMasuk = true;
-      if (item['tipe_absen'] == 'pulang') sudahPulang = true;
+      if (item['tipe_absen'] == 'masuk') {
+        sudahMasuk = true;
+      }
+      if (item['tipe_absen'] == 'pulang') {
+        sudahPulang = true;
+      }
     }
 
-    // 2. Ambil profil user (buat tau dia 'smp' atau 'smk')
+    // 5. Ambil data profil user (buat tau tingkat SMP / SMK)
     final userData = await supabase
         .from('users')
         .select('tingkat')
@@ -92,29 +107,29 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
     final String tingkat = userData['tingkat'] ?? 'smp';
 
-    // 3. AMBIL KONFIGURASI DARI DATABASE SUPABASE (TIDAK ADA HARDCODE!)
     final settings = await supabase.from('school_settings').select().single();
-
-    // Ambil jam pulang murni dari database berdasarkan tingkat siswa
     final String jamPulangStr = (tingkat == 'smp')
-        ? settings['jam_pulang_smp']
-        : settings['jam_pulang_smk'];
+        ? (settings['jam_pulang_smp'] ?? '14:10:00')
+        : (settings['jam_pulang_smk'] ?? '14:50:00');
+
+    // PRINT INI DI TERMINAL BUAT NYETRO KETEPATAN STATUSNYA:
+    print(
+      "DEBUG STATUS -> Sudah Masuk: $sudahMasuk, Sudah Pulang: $sudahPulang",
+    );
 
     return {
+      'isLibur': false,
       'sudahMasuk': sudahMasuk,
       'sudahPulang': sudahPulang,
       'tingkat': tingkat,
-      'jamPulang': jamPulangStr, // Format "14:10:00" dari database
+      'jamPulang': jamPulangStr,
     };
   }
 
   @override
-  Future<void> submitAttendance({
-    
-    required String tipeAbsen,
-  }) async {
+  Future<void> submitAttendance({required String tipeAbsen}) async {
     try {
-       Position position = await Geolocator.getCurrentPosition(
+      Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
       final user = supabase.auth.currentUser;
@@ -183,7 +198,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
   @override
   Future<Map<String, dynamic>> getSchoolSettings() async {
-     final settings = await supabase.from('school_settings').select().single();
+    final settings = await supabase.from('school_settings').select().single();
 
     return {
       'lat': (settings['school_lat'] as num?)?.toDouble() ?? -6.336527,
@@ -191,4 +206,6 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       'radius': (settings['radius_meters'] as num?)?.toDouble() ?? 50.0,
     };
   }
+
+
 }

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/entities/admin_class_attendance_entity.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/bulk_insert_users_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_attendance_by_role_usecase.dart';
+import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_classes_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_students_by_class_stream_usecase.dart';
 import 'admin_state.dart';
 
@@ -9,11 +10,13 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
   final GetAttendanceByClassUseCase getAttendanceByClassUseCase;
   final GetAttendanceByRoleUsecase getAttendanceByRoleUsecase;
   final BulkInsertUsersUsecase bulkInsertUsersUsecase;
+  final GetClassesUsecase getClassesUsecase;
 
   AdminDashboardCubit({
     required this.getAttendanceByClassUseCase,
     required this.getAttendanceByRoleUsecase,
     required this.bulkInsertUsersUsecase,
+    required this.getClassesUsecase,
   }) : super(AdminDashboardInitial());
 
   void watchStudentsByClass(String kelas) {
@@ -72,7 +75,18 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
     emit(AdminDashboardLoading());
     try{
       await bulkInsertUsersUsecase(csvString);
-      emit(AdminDashboardError("UPLOAD_SUCCES"));
+      emit(AdminUploadSuccess("Data CSV berhasil di-upload dan disinkronkan!"));
+    } catch (e) {
+      emit(AdminDashboardError(e.toString()));
+    }
+  }
+
+  Future<void> fetchAvailableClass() async {
+    emit(AdminDashboardLoading());
+
+    try {
+      final classesMap = await getClassesUsecase();
+      emit(AdminClassesLoaded(classesMap));
     } catch (e) {
       emit(AdminDashboardError(e.toString()));
     }

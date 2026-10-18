@@ -35,7 +35,6 @@ class _AttendanceScreenState extends State<AttendanceScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-
       context.read<AttendanceBloc>().add(LoadAttendanceStatusEvent());
     }
   }
@@ -145,13 +144,20 @@ class _AttendanceScreenState extends State<AttendanceScreen>
               else if (state is AttendanceLoaded) {
                 final distance = state.geoData.distanceInMeters.toInt();
                 final inRadius = state.geoData.isWithinRadius;
-
+                final bool isLibur = state.isLibur;
                 final bool sudahMasuk = state.sudahMasuk;
                 final bool sudahPulang = state.sudahPulang;
 
                 // Hitung logika sederhana di UI cuma buat nentuin Teks & Tombol (Bukan rumus berat)
                 final now = DateTime.now();
-                final timeParts = state.jamPulang.split(':');
+
+                String rawJamPulang = state.jamPulang.toString();
+                if (rawJamPulang == 'false' ||
+                    rawJamPulang == 'true' ||
+                    !rawJamPulang.contains(':')) {
+                  rawJamPulang = '14:10:00';
+                }
+                final timeParts = rawJamPulang.split(':');
                 final jamPulangSekolah = DateTime(
                   now.year,
                   now.month,
@@ -161,12 +167,18 @@ class _AttendanceScreenState extends State<AttendanceScreen>
                 );
                 bool isSudahWaktuPulang = now.isAfter(jamPulangSekolah);
 
-                // Variabel Tombol Pintar
                 String textTombol = "";
                 VoidCallback? aksiTombol;
                 Color warnaTombol = Colors.grey;
 
-                if (!sudahMasuk) {
+                if (isLibur ||
+                    DateTime.now().weekday == 6 ||
+                    DateTime.now().weekday == 7) {
+                  
+                  textTombol = "Sekolah Libur (Akhir Pekan) 🌴";
+                  warnaTombol = Colors.grey.shade400;
+                  aksiTombol = null;
+                } else if (!sudahMasuk) {
                   textTombol = "Kirim Absen Masuk";
                   warnaTombol = Colors.green;
                   // Kalau di dalam radius, hidup. Kalau di luar, mati (null)
@@ -240,7 +252,7 @@ class _AttendanceScreenState extends State<AttendanceScreen>
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Jarak lu: $distance meter dari titik sekolah",
+                        "Jarak kamu: $distance meter dari titik sekolah",
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 40),

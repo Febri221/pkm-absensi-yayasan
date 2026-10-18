@@ -12,4 +12,6 @@ abstract class AttendanceRepository {
   Future<void> submitAttendance({required String tipeAbsen});
 
   Future<Map<String, dynamic>> getSchoolSettings();
+
+ 
 }

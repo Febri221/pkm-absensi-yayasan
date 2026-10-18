@@ -17,17 +17,19 @@ class AttendanceLoaded extends AttendanceState {
   final AttendanceEntity geoData;        
   final bool sudahMasuk;                 
   final bool sudahPulang;                
-  final String jamPulang;                
+  final String jamPulang;   
+  final bool isLibur;             
 
   const AttendanceLoaded({
     required this.geoData,
     required this.sudahMasuk,
     required this.sudahPulang,
     required this.jamPulang,
+    this.isLibur = false,
   });
 
   @override
-  List<Object> get props => [geoData, sudahMasuk, sudahPulang, jamPulang];
+  List<Object> get props => [geoData, sudahMasuk, sudahPulang, jamPulang, isLibur];
 }
 
 class AttendanceSubmitting extends AttendanceState {}
