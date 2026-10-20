@@ -101,9 +101,14 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     // 5. Ambil data profil user (buat tau tingkat SMP / SMK)
     final userData = await supabase
         .from('users')
-        .select('tingkat')
+        .select('tingkat, is_active')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
+        
+    if (userData == null || userData['is_active'] == false) {
+      await supabase.auth.signOut(); // Logout paksa dari memori HP
+      throw 'AKUN_TIDAK_VALID';
+    }
 
     final String tingkat = userData['tingkat'] ?? 'smp';
 
@@ -206,6 +211,4 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       'radius': (settings['radius_meters'] as num?)?.toDouble() ?? 50.0,
     };
   }
-
-
 }

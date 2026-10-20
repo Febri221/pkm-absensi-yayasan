@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
+import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_attendance_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/repositories/admin_class_repository.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/domain/usecase/get_school_settings_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/attendance/data/repository/attendance_repository_impl.dart';
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           create: (context) => HistoryRepositoriesImpl(),
         ),
         RepositoryProvider<AdminClassRepository>(
-          create: (context) => AdminClassRepositoryImpl(),
+          create: (context) => AdminAttendanceRepositoryImpl(),
         ),
       ],
       child: MultiBlocProvider(

@@ -12,14 +12,32 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final emailInternal = "$nomorInduk@absensi.sekolah.internal";
 
-      await supabase.auth.signInWithPassword(
+      // 1. Tembak login ke Supabase Auth
+      final response = await supabase.auth.signInWithPassword(
         email: emailInternal,
         password: password,
       );
+
+      final user = response.user;
+      if (user == null) throw Exception('Login gagal.');
+
+      // 2. KUNCI PENGAMAN: Cek apakah data user ini ADA di tabel users dan AKTIF?
+      final cekUser = await supabase
+          .from('users')
+          .select('is_active')
+          .eq('id', user.id)
+          .maybeSingle(); // Pakai maybeSingle biar ga crash kalau datanya 0
+
+      // Kalau datanya kosong (udah dihapus) ATAU is_active nya false
+      if (cekUser == null || cekUser['is_active'] == false) {
+        // Langsung cabut gelangnya (logout paksa)
+        await supabase.auth.signOut();
+        throw Exception('Akun Anda tidak ditemukan atau sudah dinonaktifkan.');
+      }
+
     } catch (e) {
-      throw Exception(
-        'Gagal login: Periksa kembali Nomor Induk dan Kata Sandi Anda.',
-      );
+      // Pastikan pesan error yang dilempar bersih
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/teacher_attendance/teacher_attendance_cubit.dart';
 import '../cubit/teacher_attendance/teacher_attendance_state.dart';
-import '../../data/repositories/admin_class_repository_impl.dart';
+import '../../data/repositories/admin_attendance_repository_impl.dart';
 import '../../domain/usecase/get_attendance_by_role_usecase.dart';
 import '../widgets/admin_guru_table_widget.dart';
 
@@ -15,7 +15,7 @@ class AdminGuruAttendanceScreen extends StatelessWidget {
       // Sediakan TeacherAttendanceCubit dan langsung tembak fetch data guru
       create: (context) => TeacherAttendanceCubit(
         getAttendanceByRoleUsecase: GetAttendanceByRoleUsecase(
-          AdminClassRepositoryImpl(),
+          AdminAttendanceRepositoryImpl(),
         ),
       )..fetchTeachersAttendance(),
       child: const _AdminGuruAttendanceView(),

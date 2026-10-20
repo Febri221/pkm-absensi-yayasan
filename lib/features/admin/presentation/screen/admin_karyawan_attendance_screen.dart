@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/employee_attendance/employee_attendance_cubit.dart';
 import '../cubit/employee_attendance/employee_attendance_state.dart';
-import '../../data/repositories/admin_class_repository_impl.dart';
+import '../../data/repositories/admin_attendance_repository_impl.dart';
 import '../../domain/usecase/get_attendance_by_role_usecase.dart';
 import '../widgets/admin_karyawan_table_widget.dart';
 
@@ -15,7 +15,7 @@ class AdminKaryawanAttendanceScreen extends StatelessWidget {
       // Sediakan EmployeeAttendanceCubit khusus karyawan
       create: (context) => EmployeeAttendanceCubit(
         getAttendanceByRoleUsecase: GetAttendanceByRoleUsecase(
-          AdminClassRepositoryImpl(),
+          AdminAttendanceRepositoryImpl(),
         ),
       )..fetchEmployeesAttendance(),
       child: const _AdminKaryawanAttendanceView(),

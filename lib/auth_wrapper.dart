@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'features/admin/presentation/screen/admin_login_screen.dart'; // Ganti path sesuai project lu
+import 'features/admin/presentation/screen/admin_login_screen.dart'; 
 import 'features/auth/presentation/screen/login_screen.dart';
 import 'package:sistem_absensi_sekolah/navigation/presentation/screen/main_navigation_screen.dart';
 import 'package:sistem_absensi_sekolah/features/admin/presentation/screen/admin_main_layout_screen.dart';
-import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
+import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_attendance_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/bulk_insert_users_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_attendance_by_role_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_classes_usecase.dart';
@@ -33,23 +33,21 @@ class AuthWrapper extends StatelessWidget {
         final session = snapshot.data?.session;
 
         if (session != null) {
-          // ==========================================
-          // KONDISI: USER SUDAH LOGIN (Sesi Ada)
-          // ==========================================
+
           if (kIsWeb) {
             return BlocProvider(
               create: (context) => AdminDashboardCubit(
                 getClassesUsecase: GetClassesUsecase(
-                  AdminClassRepositoryImpl(),
+                  AdminAttendanceRepositoryImpl(),
                 ),
                 bulkInsertUsersUsecase: BulkInsertUsersUsecase(
-                  AdminClassRepositoryImpl(),
+                  AdminAttendanceRepositoryImpl(),
                 ),
                 getAttendanceByRoleUsecase: GetAttendanceByRoleUsecase(
-                  AdminClassRepositoryImpl(),
+                  AdminAttendanceRepositoryImpl(),
                 ),
                 getAttendanceByClassUseCase: GetAttendanceByClassUseCase(
-                  AdminClassRepositoryImpl(),
+                  AdminAttendanceRepositoryImpl(),
                 ),
               )..fetchAvailableClass(), // Opsional: langsung tarik data kelas pas dibuka
               child: const AdminMainLayoutScreen(),

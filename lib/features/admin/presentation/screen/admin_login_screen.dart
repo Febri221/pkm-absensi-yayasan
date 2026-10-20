@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_class_repository_impl.dart';
+import 'package:sistem_absensi_sekolah/features/admin/data/repositories/admin_attendance_repository_impl.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/bulk_insert_users_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_attendance_by_role_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_classes_usecase.dart';

@@ -15,5 +15,10 @@ abstract class AdminClassRepository {
 
   Future<List<AdminClassAttendanceEntity>> getAttendanceByRole(String role);
 
-   Future<Map<String, List<String>>> getAvailableClasses();
+  Future<Map<String, List<String>>> getAvailableClasses();
+
+  Future<void> bulkUpdateAttendance({
+    required List<String> userIds,
+    required String status,
+  });
 }
