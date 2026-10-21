@@ -26,15 +26,17 @@ class StudentAttendanceLoaded extends StudentAttendanceState {
   final List<AdminClassAttendanceEntity> students;
   final String selectedClass;
   final Map<String, List<String>> classesMap; 
+  final DateTime tanggalDipilih;
 
   const StudentAttendanceLoaded({
     required this.students,
     required this.selectedClass,
     required this.classesMap,
+    required this.tanggalDipilih,
   });
 
   @override
-  List<Object> get props => [students, selectedClass, classesMap];
+  List<Object> get props => [students, selectedClass, classesMap, tanggalDipilih];
 }
 
 class StudentAttendanceError extends StudentAttendanceState {

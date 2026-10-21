@@ -20,13 +20,12 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainPageState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
-    // Pastikan urutan array ini sama dengan index 0, 1, 2, 3
+
     final List<Widget> _pages = [
-      const AttendanceScreen(), // Tab 0: Home / Absen GPS lu
+      const AttendanceScreen(), 
       const HistoryScreen(),
       const ProfileScreen(),
-      // const HistoryScreen(),    // Tab 1: Riwayat Absen
-      // const ProfileScreen(),    // Tab 2: Profil User
+
     ];
 
     return BlocProvider(

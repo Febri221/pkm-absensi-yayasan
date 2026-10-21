@@ -19,22 +19,7 @@ class AdminDashboardCubit extends Cubit<AdminDashboardState> {
     required this.getClassesUsecase,
   }) : super(AdminDashboardInitial());
 
-  void watchStudentsByClass(String kelas) {
-    emit(AdminDashboardLoading());
-    try {
-      // CARA PALING GAMPANG DAN AMAN DI CUBIT: Pake .listen()
-      getAttendanceByClassUseCase(kelas).listen(
-        (students) {
-          emit(AdminDashboardLoaded(students: students, selectedClass: kelas));
-        },
-        onError: (error) {
-          emit(AdminDashboardError(error.toString()));
-        },
-      );
-    } catch (e) {
-      emit(AdminDashboardError(e.toString()));
-    }
-  }
+ 
 
   void toggleCheckbox(int index, bool? value) {
     final currentState = state;

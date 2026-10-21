@@ -43,71 +43,80 @@ class AdminAttendanceRepositoryImpl implements AdminClassRepository {
   }
 
   @override
-  Stream<List<AdminClassAttendanceEntity>> streamStudentsByClass(String kelas) {
-    return supabase.from('absensi').stream(primaryKey: ['id_absen']).asyncMap((
-      _,
-    ) async {
-      // A. Ambil data master siswa berdasarkan kelas yang dipilih
-      final List<dynamic> siswaRes = await supabase
-          .from('users')
-          .select('id, nama_lengkap, nomor_induk, kelas')
-          .eq('role', 'siswa')
-          .eq('kelas', kelas)
-          .eq('is_active', true);
+Stream<List<AdminClassAttendanceEntity>> streamStudentsByClass(String kelas, DateTime tanggal) {
+  return supabase.from('absensi').stream(primaryKey: ['id_absen']).asyncMap((_) async {
+    
+    // A. Ambil data master siswa berdasarkan kelas
+    final List<dynamic> siswaRes = await supabase
+        .from('users')
+        .select('id, nama_lengkap, nomor_induk, kelas, unit_sekolah')
+        .eq('role', 'siswa')
+        .eq('kelas', kelas)
+        .eq('is_active', true);
 
-      if (siswaRes.isEmpty) return [];
+    if (siswaRes.isEmpty) return [];
 
-      final today = DateTime.now().toIso8601String().split('T')[0];
+    // B. KUNCI PERBAIKAN TANGGAL: Konversi waktu batas awal & akhir ke UTC!
+    // Ini biar akurat 100% nge-query tipe 'timestamptz' di Supabase
+    DateTime startOfDay = DateTime(tanggal.year, tanggal.month, tanggal.day, 0, 0, 0);
+    DateTime endOfDay = DateTime(tanggal.year, tanggal.month, tanggal.day, 23, 59, 59);
+    
+    String startIso = startOfDay.toUtc().toIso8601String();
+    String endIso = endOfDay.toUtc().toIso8601String();
 
-      final List<dynamic> absensiRes = await supabase
-          .from('absensi')
-          .select('*')
-          .gte('waktu_absen', '${today}T00:00:00')
-          .lte('waktu_absen', '${today}T23:59:59');
+    // Query absensi STRICTLY pada rentang tanggal yang dipilih di kalender UI
+    final List<dynamic> absensiRes = await supabase
+        .from('absensi')
+        .select('*')
+        .gte('waktu_absen', startIso)
+        .lte('waktu_absen', endIso);
 
-      List<AdminClassAttendanceEntity> report = [];
+    List<AdminClassAttendanceEntity> report = [];
 
-      // B. Looping tiap siswa untuk digabungkan dengan status absensinya hari ini
-      for (var siswa in siswaRes) {
-        String siswaId = siswa['id'];
+    // C. Looping pencocokan data
+    // Format tanggal lokal (Y-M-D) buat filter manual via Dart
+    String localDateString = startOfDay.toIso8601String().split('T')[0];
 
-        // Filter absensi siswa ini untuk hari ini saja (Masuk & Pulang)
-        var absenHariIni = absensiRes
-            .where(
-              (a) =>
-                  a['user_id'] == siswaId &&
-                  a['waktu_absen'].toString().startsWith(today),
-            )
-            .toList();
+    for (var siswa in siswaRes) {
+      String siswaId = siswa['id'];
 
-        String status = 'Belum Hadir';
-        DateTime? waktuMasuk;
-        DateTime? waktuPulang;
+      // Filter absensi siswa ini di tanggal tersebut
+      // Sengaja pakai .contains karena format timezone Supabase kadang beda string
+      var absenHariIni = absensiRes
+          .where((a) => a['user_id'] == siswaId && a['waktu_absen'].toString().contains(localDateString))
+          .toList();
 
-        for (var absen in absenHariIni) {
-          if (absen['tipe_absen'] == 'masuk') {
-            waktuMasuk = DateTime.parse(absen['waktu_absen']);
-            status = absen['status_kehadiran'] ?? 'tepat_waktu';
-          } else if (absen['tipe_absen'] == 'pulang') {
-            waktuPulang = DateTime.parse(absen['waktu_absen']);
+      String status = 'Belum Hadir';
+      DateTime? waktuMasuk;
+      DateTime? waktuPulang;
+
+      for (var absen in absenHariIni) {
+        if (absen['tipe_absen'] == 'masuk') {
+          waktuMasuk = DateTime.parse(absen['waktu_absen']);
+          status = absen['status_kehadiran'] ?? 'tepat_waktu';
+        } else if (absen['tipe_absen'] == 'pulang') {
+          waktuPulang = DateTime.parse(absen['waktu_absen']);
+          // KUNCI PERBAIKAN STATUS LOGIC: 
+          // Jika murid cuma absen pulang (waktuMasuk masih null/Belum Hadir), update statusnya!
+          if (status == 'Belum Hadir') {
+            status = absen['status_kehadiran'] ?? 'hadir_pulang';
           }
         }
-
-        // Bikin modelnya pake fromMap yang baru
-        final attendanceModel = AdminClassAttendanceModel.fromMap(
-          userMap: siswa,
-          statusKehadiran: status,
-          waktuMasuk: waktuMasuk,
-          waktuPulang: waktuPulang,
-        );
-
-        // Masukkan ke dalam list 'report' (sesuai nama variabel di atas)
-        report.add(attendanceModel);
       }
 
-      return report;
-    });
-  }
+      final attendanceModel = AdminClassAttendanceModel.fromMap(
+        userMap: siswa,
+        statusKehadiran: status,
+        waktuMasuk: waktuMasuk,
+        waktuPulang: waktuPulang,
+      );
+
+      report.add(attendanceModel);
+    }
+
+    return report;
+  });
+}
 
   @override
   Future<void> updateManualAttendance({

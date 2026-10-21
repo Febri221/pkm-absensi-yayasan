@@ -4,7 +4,7 @@ abstract class AdminClassRepository {
 
   Future<List<AdminClassAttendanceEntity>> getAdminAttendanceList();
   
-  Stream<List<AdminClassAttendanceEntity>> streamStudentsByClass(String kelas);
+  Stream<List<AdminClassAttendanceEntity>> streamStudentsByClass(String kelas, DateTime tanggal);
 
   Future<void>updateManualAttendance({
     required String userId, 

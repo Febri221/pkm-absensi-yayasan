@@ -19,6 +19,7 @@ import 'package:sistem_absensi_sekolah/features/history/domain/repositories/hist
 import 'package:sistem_absensi_sekolah/features/history/domain/usecase/get_history_usecase.dart';
 import 'package:sistem_absensi_sekolah/features/history/presentation/bloc/history_bloc.dart';
 import 'auth_wrapper.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; 
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -76,6 +77,15 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('id', 'ID'),
+            Locale('en', 'US'),
+          ],
           home:  const AuthWrapper()
         ),
       ),

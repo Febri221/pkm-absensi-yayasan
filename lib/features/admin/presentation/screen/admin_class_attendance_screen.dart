@@ -41,6 +41,7 @@ class _AdminClassAttendanceViewState extends State<_AdminClassAttendanceView> {
   String? _jenjangDipilih;
   String? _kelasDipilih;
   List<String> _listKelasTersedia = [];
+  DateTime _tanggalDipilih = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +71,7 @@ class _AdminClassAttendanceViewState extends State<_AdminClassAttendanceView> {
                   jenjangDipilih: _jenjangDipilih,
                   kelasDipilih: _kelasDipilih,
                   listKelasTersedia: _listKelasTersedia,
+                  tanggalDipilih: _tanggalDipilih,
                   onUnitChanged: (newUnit) {
                     setState(() {
                       _jenjangDipilih = newUnit;
@@ -84,52 +86,92 @@ class _AdminClassAttendanceViewState extends State<_AdminClassAttendanceView> {
                     if (newKelas != null && dataKelas.isNotEmpty) {
                       context
                           .read<StudentAttendanceCubit>()
-                          .watchStudentsByClass(newKelas, dataKelas);
+                          .watchStudentsByClass(
+                            newKelas,
+                            dataKelas,
+                           _tanggalDipilih,
+                          );
                     }
                   },
+
+                  onTanggalChanged: (tanggalBaru) {
+                    setState(() {
+                      _tanggalDipilih = tanggalBaru;
+                    });
+
+                    if (_kelasDipilih != null && dataKelas.isNotEmpty) {
+                      context.read<StudentAttendanceCubit>().watchStudentsByClass(_kelasDipilih!, dataKelas, _tanggalDipilih);
+                    }
+                  }
                 );
               },
             ),
 
             // Di dalam file screen utama lu (AdminClassAttendanceScreen):
-ElevatedButton.icon(
-  onPressed: _kelasDipilih == null ? null : () {
-    // Tampilkan Dialog konfirmasi pilihan status massal
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text("Ubah Status Kehadiran Masal"),
-          content: const Text("Pilih status untuk semua siswa yang dicentang:"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                // PANGGIL CUBIT DARI SCREEN UTAMA!
-                context.read<StudentAttendanceCubit>().saveButtonAttendance('tepat_waktu', _kelasDipilih!);
-              },
-              child: const Text("Tepat Waktu", style: TextStyle(color: Colors.green)),
+            ElevatedButton.icon(
+              onPressed: _kelasDipilih == null
+                  ? null
+                  : () {
+                      // Tampilkan Dialog konfirmasi pilihan status massal
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext dialogContext) {
+                          return AlertDialog(
+                            title: const Text("Ubah Status Kehadiran Masal"),
+                            content: const Text(
+                              "Pilih status untuk semua siswa yang dicentang:",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                  // PANGGIL CUBIT DARI SCREEN UTAMA!
+                                  context
+                                      .read<StudentAttendanceCubit>()
+                                      .saveButtonAttendance(
+                                        'tepat_waktu',
+                                        _kelasDipilih!,
+                                      );
+                                },
+                                child: const Text(
+                                  "Tepat Waktu",
+                                  style: TextStyle(color: Colors.green),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                  context
+                                      .read<StudentAttendanceCubit>()
+                                      .saveButtonAttendance(
+                                        'terlambat',
+                                        _kelasDipilih!,
+                                      );
+                                },
+                                child: const Text(
+                                  "Terlambat",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(dialogContext),
+                                child: const Text(
+                                  "Batal",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+              icon: const Icon(Icons.check_box, size: 18),
+              label: const Text("Simpan Perubahan Massal"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                context.read<StudentAttendanceCubit>().saveButtonAttendance('terlambat', _kelasDipilih!);
-              },
-              child: const Text("Terlambat", style: TextStyle(color: Colors.red)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text("Batal", style: TextStyle(color: Colors.grey)),
-            ),
-          ],
-        );
-      },
-    );
-  },
-  icon: const Icon(Icons.check_box, size: 18),
-  label: const Text("Simpan Perubahan Massal"),
-  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-),
             const SizedBox(height: 24),
 
             // 2. PANGGIL WIDGET TABEL

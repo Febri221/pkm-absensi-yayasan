@@ -4,11 +4,14 @@ import 'package:sistem_absensi_sekolah/features/admin/domain/usecase/get_student
 import '../../../domain/entities/admin_class_attendance_entity.dart';
 import '../../../domain/usecase/get_classes_usecase.dart';
 import 'student_attendance_state.dart';
+import 'dart:async';
 
 class StudentAttendanceCubit extends Cubit<StudentAttendanceState> {
   final GetAttendanceByClassUseCase getAttendanceByClassUseCase;
   final GetClassesUsecase getClassesUsecase;
   final BulkUpdateAttendanceUsecase bulkUpdateAttendanceUsecase;
+
+  StreamSubscription? _studentSubscription;
 
   StudentAttendanceCubit({
     required this.getAttendanceByClassUseCase,
@@ -31,16 +34,19 @@ class StudentAttendanceCubit extends Cubit<StudentAttendanceState> {
   void watchStudentsByClass(
     String kelas,
     Map<String, List<String>> currentClassesMap,
+    DateTime tanggal,
   ) {
     emit(StudentAttendanceLoading());
     try {
-      getAttendanceByClassUseCase(kelas).listen(
+      _studentSubscription?.cancel();
+      _studentSubscription = getAttendanceByClassUseCase(kelas, tanggal).listen(
         (students) {
           emit(
             StudentAttendanceLoaded(
               students: students,
               selectedClass: kelas,
               classesMap: currentClassesMap,
+              tanggalDipilih: tanggal,
             ),
           );
         },
@@ -69,6 +75,7 @@ class StudentAttendanceCubit extends Cubit<StudentAttendanceState> {
           students: updatedStudents,
           selectedClass: currentState.selectedClass,
           classesMap: currentState.classesMap,
+          tanggalDipilih: currentState.tanggalDipilih,
         ),
       );
     }
@@ -86,17 +93,21 @@ class StudentAttendanceCubit extends Cubit<StudentAttendanceState> {
           .map((student) => student.idSiswa)
           .toList();
 
-        if (selectedUserIds.isEmpty) {
-          return;
-        }
+      if (selectedUserIds.isEmpty) {
+        return;
+      }
       emit(StudentAttendanceLoading());
       try {
-      await bulkUpdateAttendanceUsecase(
-        userIds: selectedUserIds, 
-        status: statusTarget,
-      );
+        await bulkUpdateAttendanceUsecase(
+          userIds: selectedUserIds,
+          status: statusTarget,
+        );
 
-      watchStudentsByClass(currentKelas, currentState.classesMap);
+        watchStudentsByClass(
+          currentKelas,
+          currentState.classesMap,
+          currentState.tanggalDipilih,
+        );
       } catch (e) {
         emit(StudentAttendanceError(e.toString()));
       }
@@ -116,10 +127,15 @@ class StudentAttendanceCubit extends Cubit<StudentAttendanceState> {
           students: updatedStudents,
           selectedClass: currentState.selectedClass,
           classesMap: currentState.classesMap,
+          tanggalDipilih: currentState.tanggalDipilih,
         ),
       );
     }
   }
 
-  
+  @override
+  Future<void> close() {
+    _studentSubscription?.cancel();
+    return super.close();
+  }
 }

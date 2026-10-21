@@ -6,7 +6,10 @@ class GetAttendanceByClassUseCase {
 
   GetAttendanceByClassUseCase(this.repository);
 
-  Stream<List<AdminClassAttendanceEntity>> call(String kelas) {
-    return repository.streamStudentsByClass(kelas);
+  Stream<List<AdminClassAttendanceEntity>> call(
+    String kelas,
+    DateTime tanggal,
+  ) {
+    return repository.streamStudentsByClass(kelas, tanggal);
   }
 }
